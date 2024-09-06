@@ -1,72 +1,63 @@
 import nodemailer from "nodemailer";
 import Mailgen from "mailgen";
-
 import ENV from "../config.js";
 
-// https://ethereal.email/create
-let nodeConfig = {
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false, // true for 465, false for other ports
+// Create a nodemailer transporter for Gmail
+const transporter = nodemailer.createTransport({
+  host: ENV.SMTP_HOST, // Gmail's SMTP host
+  port: ENV.SMTP_PORT, // Gmail's SMTP port
+  secure: true, // Use SSL for Gmail
   auth: {
-    user: ENV.EMAIL, // generated ethereal user
-    pass: ENV.PASSWORD, // generated ethereal password
+    user: ENV.SMTP_MAIL, // Your Gmail email
+    pass: ENV.SMTP_PASSWORD, // Your Gmail app password
   },
-};
-
-let transporter = nodemailer.createTransport(nodeConfig);
+});
 
 let MailGenerator = new Mailgen({
   theme: "default",
   product: {
-    name: "Mailgen",
-    link: "https://mailgen.js/",
+    name: "Your Service", // Personal service name or app name
+    link: "https://yourservice.com/", // Personal website or app link
   },
 });
 
 /** POST: http://localhost:8080/api/registerMail 
  * @param: {
-  "username" : "example123",
-  "userEmail" : "admin123",
-  "text" : "",
-  "subject" : "",
+  "username": "example123",
+  "userEmail": "admin123@gmail.com",
+  "text": "",
+  "subject": "",
 }
 */
 export const registerMail = async (req, res) => {
-
   const { username, userEmail, text, subject } = req.body;
-//  console.log(username, userEmail, text, subject);
 
-  
-
-  // body of the email
+  // Email content
   var email = {
     body: {
       name: username,
       intro:
         text ||
-        "Welcome to Daily Tuition! We're very excited to have you on board.",
+        `Hi ${username}, welcome! We're thrilled to have you with us. You’re now part of a special community, and we hope you have a great experience.`,
       outro:
-        "Need help, or have questions? Just reply to this email, we'd love to help.",
+        "If you have any questions, just reply to this email. We’re here to help.",
     },
   };
 
   var emailBody = MailGenerator.generate(email);
 
   let message = {
-    from: ENV.EMAIL,
-    to: userEmail,
-    subject: subject || "Signup Successful",
+    from: ENV.SMTP_MAIL, // Gmail address
+    to: userEmail, // Recipient's email
+    subject: subject || "Welcome aboard!",
     html: emailBody,
   };
 
-  // send mail
+  // Send the email
   transporter
     .sendMail(message)
     .then(() => {
-      return res
-        .status(200)
-        .send({ msg: "You should receive an email from us." });
+      return res.status(200).send({ msg: "Email sent successfully!" });
     })
-    .catch((error) => res.status(500).send({ error }));
+    .catch((error) => res.status(500).send({ error: "Error sending email" }));
 };
