@@ -11,6 +11,7 @@ const config = {
   SMTP_PORT: process.env.SMTP_PORT,
   SMTP_HOST: process.env.SMTP_HOST,
   MONGO_URI: process.env.MONGO_URI,
+  PORT : process.env.PORT
 };
 
 export default config;

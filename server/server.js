@@ -1,5 +1,5 @@
 // const express =require('express')
-
+import ENV from "./config.js"
 import express from "express"
 import cors from 'cors'
 import morgan from 'morgan'
@@ -20,7 +20,7 @@ app.use(morgan('tiny'))
 app.disable('x-powered-by')
 
 
-const port = 8080;
+const port = ENV.PORT || 8080;
 
 
 app.get('/',(req,res)=>{
